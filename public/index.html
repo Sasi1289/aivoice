@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pichi Budamkai 🥑</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" style="width: 50px; height: 50px; vertical-align: middle; margin-right: 10px;">
+          <!-- Avocado body -->
+          <ellipse cx="50" cy="60" rx="35" ry="45" fill="#88b04b"/>
+          <!-- Avocado seed -->
+          <ellipse cx="50" cy="65" rx="18" ry="22" fill="#d4a574"/>
+          <!-- Left eye -->
+          <ellipse cx="40" cy="50" rx="5" ry="7" fill="white"/>
+          <circle cx="41" cy="52" r="3" fill="black"/>
+          <!-- Right eye -->
+          <ellipse cx="60" cy="50" rx="5" ry="7" fill="white"/>
+          <circle cx="61" cy="52" r="3" fill="black"/>
+          <!-- Smile -->
+          <path d="M 42 58 Q 50 62 58 58" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Left arm -->
+          <path d="M 20 65 Q 15 70 18 75" stroke="#88b04b" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <ellipse cx="18" cy="77" rx="4" ry="5" fill="#88b04b"/>
+          <!-- Right arm -->
+          <path d="M 80 65 Q 85 70 82 75" stroke="#88b04b" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <ellipse cx="82" cy="77" rx="4" ry="5" fill="#88b04b"/>
+        </svg>
+        Pichi Budamkai
+      </h1>
+      <p class="subtitle">Because you needed an AI with attitude</p>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+      <div class="message bot-message">
+        <div class="message-content">
+          <p>Oh look, another human who needs my help. How delightful. 🙄 What do you want?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <div class="input-actions">
+        <button class="action-btn" id="voiceBtn" title="Voice Input">🎤</button>
+        <button class="action-btn" id="imageBtn" title="Upload Image">📷</button>
+        <button class="action-btn" id="emojiBtn" title="Emoji Picker">😊</button>
+        <button class="action-btn" id="gifBtn" title="GIF">🎬</button>
+        <button class="action-btn" id="voiceSettingsBtn" title="Voice Settings" onclick="showVoiceSettings()">🔊</button>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+      </div>
+      
+      <div class="input-wrapper">
+        <textarea 
+          id="messageInput" 
+          placeholder="Type your question... if you dare"
+          rows="1"
+        ></textarea>
+        <button id="sendBtn" class="send-btn">
+          <span>Send</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="emoji-picker" id="emojiPicker" style="display: none;">
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

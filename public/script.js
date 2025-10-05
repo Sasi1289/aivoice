@@ -103,33 +103,158 @@ emojiPicker.addEventListener('click', async (e) => {
   }
 });
 
-// GIF button - search and send GIF
+// GIF picker state
+let gifPickerOpen = false;
+let currentGifSearch = '';
+
+// GIF button - open GIF picker
 gifBtn.addEventListener('click', async () => {
-  const query = prompt('What GIF do you want? (e.g., "happy", "confused", "dancing")');
-  if (!query) return;
+  if (gifPickerOpen) {
+    closeGifPicker();
+    return;
+  }
+  
+  // Create GIF picker
+  const gifPicker = document.createElement('div');
+  gifPicker.id = 'gifPicker';
+  gifPicker.className = 'gif-picker';
+  gifPicker.innerHTML = `
+    <div class="gif-picker-header">
+      <input type="text" id="gifSearch" placeholder="Search GIFs..." />
+      <button id="closeGifPicker">✕</button>
+    </div>
+    <div class="gif-grid" id="gifGrid">
+      <div class="gif-loading">Loading trending GIFs...</div>
+    </div>
+  `;
+  
+  document.body.appendChild(gifPicker);
+  gifPickerOpen = true;
+  
+  // Load trending GIFs
+  loadGifs('trending');
+  
+  // Search functionality
+  const searchInput = document.getElementById('gifSearch');
+  let searchTimeout;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (e.target.value.trim()) {
+        loadGifs(e.target.value);
+      } else {
+        loadGifs('trending');
+      }
+    }, 500);
+  });
+  
+  // Close button
+  document.getElementById('closeGifPicker').addEventListener('click', closeGifPicker);
+  
+  // Focus search
+  searchInput.focus();
+});
+
+function closeGifPicker() {
+  const picker = document.getElementById('gifPicker');
+  if (picker) picker.remove();
+  gifPickerOpen = false;
+}
+
+async function loadGifs(query) {
+  const gifGrid = document.getElementById('gifGrid');
+  if (!gifGrid) return;
+  
+  gifGrid.innerHTML = '<div class="gif-loading">Loading...</div>';
   
   try {
-    // Using Tenor API
-    const response = await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&limit=1`);
+    const endpoint = query === 'trending' 
+      ? 'https://tenor.googleapis.com/v2/featured'
+      : 'https://tenor.googleapis.com/v2/search';
+    
+    const url = query === 'trending'
+      ? `${endpoint}?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&limit=20`
+      : `${endpoint}?q=${encodeURIComponent(query)}&key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&limit=20`;
+    
+    const response = await fetch(url);
     const data = await response.json();
     
     if (data.results && data.results.length > 0) {
-      const gifUrl = data.results[0].media_formats.gif.url;
-      addMessage(`<img src="${gifUrl}" alt="${query} GIF" style="max-width: 300px;">`, 'user');
-      
-      // Send GIF context to AI
-      const tempMsg = messageInput.value;
-      messageInput.value = `[User sent a ${query} GIF]`;
-      await sendMessage('gif');
-      messageInput.value = tempMsg;
+      gifGrid.innerHTML = '';
+      data.results.forEach(gif => {
+        const gifItem = document.createElement('div');
+        gifItem.className = 'gif-item';
+        gifItem.innerHTML = `<img src="${gif.media_formats.tinygif.url}" alt="${gif.content_description}">`;
+        gifItem.onclick = () => selectGif(gif, query);
+        gifGrid.appendChild(gifItem);
+      });
     } else {
-      alert('No GIF found. Try another search term!');
+      gifGrid.innerHTML = '<div class="gif-loading">No GIFs found. Try another search!</div>';
     }
   } catch (error) {
-    console.error('GIF error:', error);
-    alert('Failed to load GIF. Try again!');
+    console.error('GIF loading error:', error);
+    gifGrid.innerHTML = '<div class="gif-loading">Failed to load GIFs. Try again!</div>';
   }
-});
+}
+
+async function selectGif(gif, searchQuery) {
+  const gifUrl = gif.media_formats.gif.url;
+  const description = searchQuery === 'trending' ? 'a GIF' : `a ${searchQuery} GIF`;
+  
+  // Add user's GIF to chat
+  addMessage(`<img src="${gifUrl}" alt="${description}" style="max-width: 300px; border-radius: 10px;">`, 'user');
+  
+  // Close picker
+  closeGifPicker();
+  
+  // Show typing indicator
+  const typingId = addTypingIndicator();
+  
+  try {
+    // Send to AI
+    const formData = new FormData();
+    formData.append('message', `[User sent ${description}]`);
+    formData.append('type', 'gif');
+    
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    // Remove typing indicator
+    removeTypingIndicator(typingId);
+    
+    // Parse AI response to extract GIF search term
+    const lines = data.reply.split('\n');
+    const gifSearchTerm = lines[0].trim();
+    const comment = lines.slice(1).join('\n').trim();
+    
+    // Search for AI's reaction GIF
+    try {
+      const gifResponse = await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(gifSearchTerm)}&key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&limit=1`);
+      const gifData = await gifResponse.json();
+      
+      if (gifData.results && gifData.results.length > 0) {
+        const reactionGifUrl = gifData.results[0].media_formats.gif.url;
+        // Add AI's GIF response
+        const gifMessage = `<img src="${reactionGifUrl}" alt="${gifSearchTerm}" style="max-width: 300px; border-radius: 10px;"><br><br>${comment || data.reply}`;
+        addMessage(gifMessage, 'bot', true);
+      } else {
+        // Fallback to text if GIF not found
+        addMessage(data.reply, 'bot', true);
+      }
+    } catch (gifError) {
+      console.error('Failed to load AI reaction GIF:', gifError);
+      addMessage(data.reply, 'bot', true);
+    }
+    
+  } catch (error) {
+    removeTypingIndicator(typingId);
+    addMessage('Oops, something went wrong. How embarrassing. 😅', 'bot');
+  }
+}
 
 // Close emoji picker when clicking outside
 document.addEventListener('click', (e) => {

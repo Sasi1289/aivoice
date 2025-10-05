@@ -35,12 +35,24 @@ An AI chat application with attitude! This app searches the internet for answers
 
 ## API Keys
 
-### ElevenLabs API Key (OPTIONAL - for realistic voice)
+### PlayHT API (RECOMMENDED - Accepts Indian Payments) 🇮🇳
+- Go to https://play.ht and sign up
+- Get API Key and User ID from API Access
+- Free tier: 12,500 words per month
+- Voice cloning available
+- Accepts UPI, Indian cards via Razorpay
+- See `PLAYHT_SETUP.md` for detailed setup
+
+### Alternative: ElevenLabs API
 - Go to https://elevenlabs.io
-- Sign up (free account)
-- Go to your profile and copy your API key
 - Free tier: 10,000 characters per month
-- If not set, will use browser's built-in voice
+- Only accepts USD payments
+- See `VOICE_SETUP.md` for details
+
+### Alternative: Browser Voices (FREE - No Setup)
+- Click the 🔊 button in the input area
+- Select from your system's voices
+- Works immediately
 
 ### Serper API Key
 - Sign up at https://serper.dev

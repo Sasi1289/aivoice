@@ -1,0 +1,7 @@
+# Requirements for Voice Cloning with Coqui TTS
+# Requires Python 3.9, 3.10, or 3.11
+# Install with: py -3.11 -m pip install -r requirements-coqui.txt
+
+TTS==0.22.0
+flask==3.0.0
+flask-cors==4.0.0

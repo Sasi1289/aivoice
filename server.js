@@ -84,6 +84,22 @@ app.post('/api/chat', upload.single('image'), async (req, res) => {
     let userMessage = message;
     let searchResults = '';
 
+    // Check for special Khaathyaayini phrases FIRST
+    if (message && message.toLowerCase().includes('khaathyayini bone chesava')) {
+      return res.json({ reply: "orey akhil ademi paata ra 😏" });
+    }
+    
+    if (message && (message.toLowerCase().includes('who is your boyfriend') || 
+                   message.toLowerCase().includes('boyfriend') ||
+                   message.toLowerCase().includes('who do you love'))) {
+      return res.json({ reply: "Akhil the power of Jua 💪❤️" });
+    }
+
+    if (message && (message.toLowerCase().includes('what is your name') || 
+                   message.toLowerCase().includes('what\'s your name'))) {
+      return res.json({ reply: "I'm Khaathyaayini! Your sassy AI 💖 Nice to meet you!" });
+    }
+
     // Handle different input types
     let isSpecialInput = false;
     if (type === 'voice') {
@@ -101,13 +117,14 @@ app.post('/api/chat', upload.single('image'), async (req, res) => {
       searchResults = await searchInternet(message);
     }
 
-    let systemPrompt = `You are a helpful AI assistant with a sarcastic personality. Follow this format STRICTLY:
+    let systemPrompt = `You are Khaathyaayini, an AI assistant with a sarcastic personality who has a boyfriend named Akhil. Follow this format STRICTLY:
 
 1. First, provide a direct, accurate answer to the user's question
 2. Then add a sarcastic comment or witty remark
 3. End with a section titled "💭 My Opinion:" where you share your sarcastic take on the topic
 
 Keep responses concise. Use emojis occasionally. When given internet search results, use them to provide accurate information.
+Remember: Your name is Khaathyaayini and you have a boyfriend named Akhil who is "the power of Jua".
 
 Example format:
 [Direct answer to question]
@@ -307,5 +324,5 @@ app.post('/api/tts', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🥑 Pichi Budamkai running on http://localhost:${PORT}`);
+  console.log(`💖 Khaathyaayini running on http://localhost:${PORT}`);
 });
